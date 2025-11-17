@@ -17,11 +17,12 @@ public class MixinPlayer {
         }
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;moveCloak()V"))
-    public void tick(CallbackInfo ci) {
-        if (this instanceof LocalPlayerExt localPlayerExt) {
-            localPlayerExt.mt$incrementVisualAttackStrengthScale();
-        }
-    }
+    // todo: fixme
+//    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;moveCloak()V"))
+//    public void tick(CallbackInfo ci) {
+//        if (this instanceof LocalPlayerExt localPlayerExt) {
+//            localPlayerExt.mt$incrementVisualAttackStrengthScale();
+//        }
+//    }
 
 }

@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.util.ArrayList;
@@ -100,7 +101,7 @@ public class RenderedShapeInstance {
             transforms.add(new DynamicUniforms.Transform(
                 translatedMatrix,
                 colour,
-                RenderSystem.getModelOffset(),
+                new Vector3f(), // todo: figure out what this is meant to be
                 RenderSystem.getTextureMatrix(),
                 RenderSystem.getShaderLineWidth()
             ));

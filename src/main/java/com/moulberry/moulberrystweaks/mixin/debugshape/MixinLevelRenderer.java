@@ -36,8 +36,7 @@ public class MixinLevelRenderer {
         value = "INVOKE",
         target = "Lnet/minecraft/client/Options;getCloudsType()Lnet/minecraft/client/CloudStatus;"
     ))
-    public void renderLevelPost(GraphicsResourceAllocator graphicsResourceAllocator, DeltaTracker deltaTracker, boolean bl, Camera camera, Matrix4f frustumMatrix,
-            Matrix4f projectionMatrix, GpuBufferSlice gpuBufferSlice, Vector4f vector4f, boolean bl2, CallbackInfo ci, @Local FrameGraphBuilder frameGraphBuilder) {
+    public void renderLevelPost(GraphicsResourceAllocator graphicsResourceAllocator, DeltaTracker deltaTracker, boolean renderBlockOutline, Camera camera, Matrix4f frustumMatrix, Matrix4f projectionMatrix, Matrix4f cullingProjectionMatrix, GpuBufferSlice shaderFog, Vector4f fogColor, boolean renderSky, CallbackInfo ci, @Local FrameGraphBuilder frameGraphBuilder) {
         if (!DebugRenderManager.hasShapesToRender()) {
             return;
         }

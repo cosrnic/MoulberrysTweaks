@@ -87,11 +87,13 @@ public class MoulberrysTweaks implements ModInitializer {
 	public void onInitialize() {
 		LOGGER.info("Initializing Moulberry's Tweaks");
 
+        final KeyMapping.Category category = new KeyMapping.Category(ResourceLocation.fromNamespaceAndPath("moulberrystweaks", "keybind"));
+
         config = MoulberrysTweaksConfig.loadFromDefaultFolder();
         viewComponentsKeyBind = KeyBindingHelper.registerKeyBinding(new KeyMapping("moulberrystweaks.keybind.view_components",
-            InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), "moulberrystweaks.keybind"));
+            InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), category));
         viewPacketsKeyBind = KeyBindingHelper.registerKeyBinding(new KeyMapping("moulberrystweaks.keybind.view_packets",
-            InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), "moulberrystweaks.keybind"));
+            InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), category));
         config.debugging.inventory.itemComponentWidgetKeybind = viewComponentsKeyBind;
         config.debugging.inventory.packetDebugWidgetKeybind = viewPacketsKeyBind;
         configElements = LatticeElements.fromAnnotations(Component.literal("Moulberry's Tweaks"), config);
@@ -183,13 +185,13 @@ public class MoulberrysTweaks implements ModInitializer {
                 dispatcher.register(command);
             }
 
-            generateFontWidthTableRegistered = config.commands.generateFontWidthTable;
-            if (config.commands.generateFontWidthTable) {
-                command = ClientCommandManager.literal("generatefontwidthtable")
-                          .then(ClientCommandManager.argument("font", ResourceLocationArgument.id())
-                                                    .executes(MoulberrysTweaks::writeFontWidths));
-                dispatcher.register(command);
-            }
+//            generateFontWidthTableRegistered = config.commands.generateFontWidthTable;
+//            if (config.commands.generateFontWidthTable) {
+//                command = ClientCommandManager.literal("generatefontwidthtable")
+//                          .then(ClientCommandManager.argument("font", ResourceLocationArgument.id())
+//                                                    .executes(MoulberrysTweaks::writeFontWidths));
+//                dispatcher.register(command);
+//            }
 
             dumpPlayerAttributesRegistered = config.commands.dumpPlayerAttributes;
             if (config.commands.dumpPlayerAttributes) {
@@ -351,52 +353,52 @@ public class MoulberrysTweaks implements ModInitializer {
             DebugRenderManager.tick();
         });
 
-        HudElementRegistry.attachElementAfter(VanillaHudElements.DEBUG, ResourceLocation.fromNamespaceAndPath("moulberrystweaks", "after_debug"), (guiGraphics, tickCounter) -> {
+        HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, ResourceLocation.fromNamespaceAndPath("moulberrystweaks", "after_debug"), (guiGraphics, tickCounter) -> {
             DebugRenderManager.renderGui(guiGraphics);
         });
 	}
-
-    private static int writeFontWidths(CommandContext<FabricClientCommandSource> cmd) {
-        ResourceLocation fontName = cmd.getArgument("font", ResourceLocation.class);
-
-        Font font = Minecraft.getInstance().font;
-        FontSet fontSet = font.fonts.apply(fontName);
-        if (fontSet.name().equals(FontManager.MISSING_FONT)) {
-            cmd.getSource().sendFeedback(Component.literal("Font does not exist"));
-            return 0;
-        }
-
-        JsonArray array = new JsonArray();
-
-        int lastWidth = -1;
-        int runLength = 0;
-        for (int c = Character.MIN_CODE_POINT; c <= Character.MAX_CODE_POINT; c++) {
-            int width = Mth.ceil(fontSet.getGlyphInfo(c, false).getAdvance());
-
-            if (lastWidth == -1) {
-                lastWidth = width;
-            } else if (lastWidth != width) {
-                array.add(runLength);
-                array.add(lastWidth);
-
-                lastWidth = width;
-                runLength = 1;
-            } else {
-                runLength += 1;
-            }
-        }
-
-        array.add(runLength);
-        array.add(lastWidth);
-
-        Path path = FabricLoader.getInstance().getGameDir().resolve("widths.json");
-        try {
-            Files.writeString(path, new Gson().toJson(array));
-            cmd.getSource().sendFeedback(Component.literal("Wrote widths.json in .minecraft folder"));
-        } catch (IOException ignored) {
-            cmd.getSource().sendFeedback(Component.literal("Failed to write widths.json"));
-        }
-
-        return 0;
-    }
+//
+//    private static int writeFontWidths(CommandContext<FabricClientCommandSource> cmd) {
+//        ResourceLocation fontName = cmd.getArgument("font", ResourceLocation.class);
+//
+//        Font font = Minecraft.getInstance().font;
+//        FontSet fontSet = font.fonts.apply(fontName);
+//        if (fontSet.name().equals(FontManager.MISSING_FONT)) {
+//            cmd.getSource().sendFeedback(Component.literal("Font does not exist"));
+//            return 0;
+//        }
+//
+//        JsonArray array = new JsonArray();
+//
+//        int lastWidth = -1;
+//        int runLength = 0;
+//        for (int c = Character.MIN_CODE_POINT; c <= Character.MAX_CODE_POINT; c++) {
+//            int width = Mth.ceil(fontSet.getGlyphInfo(c, false).getAdvance());
+//
+//            if (lastWidth == -1) {
+//                lastWidth = width;
+//            } else if (lastWidth != width) {
+//                array.add(runLength);
+//                array.add(lastWidth);
+//
+//                lastWidth = width;
+//                runLength = 1;
+//            } else {
+//                runLength += 1;
+//            }
+//        }
+//
+//        array.add(runLength);
+//        array.add(lastWidth);
+//
+//        Path path = FabricLoader.getInstance().getGameDir().resolve("widths.json");
+//        try {
+//            Files.writeString(path, new Gson().toJson(array));
+//            cmd.getSource().sendFeedback(Component.literal("Wrote widths.json in .minecraft folder"));
+//        } catch (IOException ignored) {
+//            cmd.getSource().sendFeedback(Component.literal("Failed to write widths.json"));
+//        }
+//
+//        return 0;
+//    }
 }
