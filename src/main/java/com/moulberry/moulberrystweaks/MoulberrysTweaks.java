@@ -38,17 +38,16 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.font.FontManager;
-import net.minecraft.client.gui.font.FontSet;
+import net.minecraft.client.gui.GlyphSource;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -185,13 +184,13 @@ public class MoulberrysTweaks implements ModInitializer {
                 dispatcher.register(command);
             }
 
-//            generateFontWidthTableRegistered = config.commands.generateFontWidthTable;
-//            if (config.commands.generateFontWidthTable) {
-//                command = ClientCommandManager.literal("generatefontwidthtable")
-//                          .then(ClientCommandManager.argument("font", ResourceLocationArgument.id())
-//                                                    .executes(MoulberrysTweaks::writeFontWidths));
-//                dispatcher.register(command);
-//            }
+            generateFontWidthTableRegistered = config.commands.generateFontWidthTable;
+            if (config.commands.generateFontWidthTable) {
+                command = ClientCommandManager.literal("generatefontwidthtable")
+                          .then(ClientCommandManager.argument("font", ResourceLocationArgument.id())
+                                                    .executes(MoulberrysTweaks::writeFontWidths));
+                dispatcher.register(command);
+            }
 
             dumpPlayerAttributesRegistered = config.commands.dumpPlayerAttributes;
             if (config.commands.dumpPlayerAttributes) {
@@ -357,48 +356,50 @@ public class MoulberrysTweaks implements ModInitializer {
             DebugRenderManager.renderGui(guiGraphics);
         });
 	}
-//
-//    private static int writeFontWidths(CommandContext<FabricClientCommandSource> cmd) {
-//        ResourceLocation fontName = cmd.getArgument("font", ResourceLocation.class);
-//
-//        Font font = Minecraft.getInstance().font;
-//        FontSet fontSet = font.fonts.apply(fontName);
-//        if (fontSet.name().equals(FontManager.MISSING_FONT)) {
-//            cmd.getSource().sendFeedback(Component.literal("Font does not exist"));
-//            return 0;
-//        }
-//
-//        JsonArray array = new JsonArray();
-//
-//        int lastWidth = -1;
-//        int runLength = 0;
-//        for (int c = Character.MIN_CODE_POINT; c <= Character.MAX_CODE_POINT; c++) {
-//            int width = Mth.ceil(fontSet.getGlyphInfo(c, false).getAdvance());
-//
-//            if (lastWidth == -1) {
-//                lastWidth = width;
-//            } else if (lastWidth != width) {
-//                array.add(runLength);
-//                array.add(lastWidth);
-//
-//                lastWidth = width;
-//                runLength = 1;
-//            } else {
-//                runLength += 1;
-//            }
-//        }
-//
-//        array.add(runLength);
-//        array.add(lastWidth);
-//
-//        Path path = FabricLoader.getInstance().getGameDir().resolve("widths.json");
-//        try {
-//            Files.writeString(path, new Gson().toJson(array));
-//            cmd.getSource().sendFeedback(Component.literal("Wrote widths.json in .minecraft folder"));
-//        } catch (IOException ignored) {
-//            cmd.getSource().sendFeedback(Component.literal("Failed to write widths.json"));
-//        }
-//
-//        return 0;
-//    }
+
+    private static int writeFontWidths(CommandContext<FabricClientCommandSource> cmd) {
+        ResourceLocation fontName = cmd.getArgument("font", ResourceLocation.class);
+
+        Font font = Minecraft.getInstance().font;
+        GlyphSource source = font.getGlyphSource(new FontDescription.Resource(fontName));
+        if (source == null) {
+            cmd.getSource().sendFeedback(Component.literal("Font does not exist"));
+            return 0;
+
+        }
+
+        JsonArray array = new JsonArray();
+
+        int lastWidth = -1;
+        int runLength = 0;
+        for (int c = Character.MIN_CODE_POINT; c <= Character.MAX_CODE_POINT; c++) {
+            var glyph = source.getGlyph(c);
+            int width = Mth.ceil(glyph.info().getAdvance());
+
+            if (lastWidth == -1) {
+                lastWidth = width;
+            } else if (lastWidth != width) {
+                array.add(runLength);
+                array.add(lastWidth);
+
+                lastWidth = width;
+                runLength = 1;
+            } else {
+                runLength += 1;
+            }
+        }
+
+        array.add(runLength);
+        array.add(lastWidth);
+
+        Path path = FabricLoader.getInstance().getGameDir().resolve("widths.json");
+        try {
+            Files.writeString(path, new Gson().toJson(array));
+            cmd.getSource().sendFeedback(Component.literal("Wrote widths.json in .minecraft folder"));
+        } catch (IOException ignored) {
+            cmd.getSource().sendFeedback(Component.literal("Failed to write widths.json"));
+        }
+
+        return 0;
+    }
 }
